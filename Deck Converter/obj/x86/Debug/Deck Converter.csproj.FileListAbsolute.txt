@@ -1,0 +1,11 @@
+C:\Users\Kent.BUILDERSMETAL\Documents\Visual Studio 2010\Projects\Deck Converter\Deck Converter\bin\Debug\Deck Converter.exe
+C:\Users\Kent.BUILDERSMETAL\Documents\Visual Studio 2010\Projects\Deck Converter\Deck Converter\bin\Debug\Deck Converter.pdb
+C:\Users\Kent.BUILDERSMETAL\Documents\Visual Studio 2010\Projects\Deck Converter\Deck Converter\bin\Debug\Octgn.Data.dll
+C:\Users\Kent.BUILDERSMETAL\Documents\Visual Studio 2010\Projects\Deck Converter\Deck Converter\bin\Debug\VistaDB.NET20.dll
+C:\Users\Kent.BUILDERSMETAL\Documents\Visual Studio 2010\Projects\Deck Converter\Deck Converter\obj\x86\Debug\ResolveAssemblyReference.cache
+C:\Users\Kent.BUILDERSMETAL\Documents\Visual Studio 2010\Projects\Deck Converter\Deck Converter\obj\x86\Debug\Deck_Converter.Form1.resources
+C:\Users\Kent.BUILDERSMETAL\Documents\Visual Studio 2010\Projects\Deck Converter\Deck Converter\obj\x86\Debug\Deck_Converter.Properties.Resources.resources
+C:\Users\Kent.BUILDERSMETAL\Documents\Visual Studio 2010\Projects\Deck Converter\Deck Converter\obj\x86\Debug\GenerateResource.read.1.tlog
+C:\Users\Kent.BUILDERSMETAL\Documents\Visual Studio 2010\Projects\Deck Converter\Deck Converter\obj\x86\Debug\GenerateResource.write.1.tlog
+C:\Users\Kent.BUILDERSMETAL\Documents\Visual Studio 2010\Projects\Deck Converter\Deck Converter\obj\x86\Debug\Deck Converter.exe
+C:\Users\Kent.BUILDERSMETAL\Documents\Visual Studio 2010\Projects\Deck Converter\Deck Converter\obj\x86\Debug\Deck Converter.pdb
