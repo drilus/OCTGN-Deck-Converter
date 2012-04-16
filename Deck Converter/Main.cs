@@ -27,12 +27,11 @@ namespace Deck_Converter
             InitializeComponent();
         }
 
-        private void btnConvert_Click(object sender, EventArgs e)
+        private void ConvertOCTGN()
         {
-            textBox1.Clear();
             textBox1.Text += "// Deck file for Magic Workstation (http://www.magicworkstation.com)" + Environment.NewLine;
             textBox1.Text += Environment.NewLine;
-            textBox1.Text += "//OCTGN conversion" + Environment.NewLine;           
+            textBox1.Text += "//OCTGN conversion" + Environment.NewLine;
 
             GamesRepository mygame = new Octgn.Data.GamesRepository();
             int mycount = mygame.Games.Count;
@@ -51,10 +50,10 @@ namespace Deck_Converter
                                     sideboard = true;
                                     textBox1.Text += Environment.NewLine;
                                     textBox1.Text += "// Sideboard" + Environment.NewLine;
-                                } 
+                                }
 
                             if (reader.Name == "game")
-                                gameid = reader.Value;                            
+                                gameid = reader.Value;
 
                             if (reader.Name == "qty")
                                 if (sideboard != true)
@@ -62,7 +61,7 @@ namespace Deck_Converter
                                 else textBox1.Text += "SB: " + reader.Value;
 
                             if (reader.Name == "id")
-                            {                                
+                            {
                                 Guid setid = Guid.Parse(reader.Value);
                                 string temp = mygame.Games[gameindex].GetCardById(setid).Set.Name;
 
@@ -232,10 +231,10 @@ namespace Deck_Converter
                                     temp = "MBS";
                                 #endregion
 
-                                textBox1.Text += " " + "[" + temp + "]" + " " + mygame.Games[gameindex].GetCardById(setid).Name;                                
+                                textBox1.Text += " " + "[" + temp + "]" + " " + mygame.Games[gameindex].GetCardById(setid).Name;
                             }
                         }
-                                                       
+
                         break;
                     case XmlNodeType.EndElement: //Display the end of the element.                        
                         textBox1.Text += Environment.NewLine;
@@ -244,11 +243,36 @@ namespace Deck_Converter
             }
         }
 
+        private void ConvertMWS()
+        {
+            TextReader reader = new StreamReader(textBox2.Text);
+            string line = "";
+            while ((line = reader.ReadLine()) != null)
+            {
+
+                if (line.Contains("Sideboard"))
+                {
+                }
+            }
+        }
+
+        private void btnConvert_Click(object sender, EventArgs e)
+        {
+            textBox1.Clear();
+
+            if (Path.GetExtension(textBox2.Text.ToLower()) == ".o8d".ToLower())
+                ConvertOCTGN();
+
+            if (Path.GetExtension(textBox2.Text.ToLower()) == ".mws".ToLower())
+                ConvertMWS();
+        }
+
         private void btnOpen_Click(object sender, EventArgs e)
         {
             GamesRepository mygame = new Octgn.Data.GamesRepository();            
             OpenFileDialog dialogue = new OpenFileDialog();
             dialogue.Filter = "OCTGN deck files (*.o8d) | *.o8d";
+            dialogue.Filter += "| Magic Workstation files (*.mwDeck) | *.mwDeck";
             dialogue.InitialDirectory = mygame.Games[gameindex].DefaultDecksPath;
             gamepath = mygame.Games[gameindex].DefaultDecksPath;
 
