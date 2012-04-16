@@ -21,20 +21,30 @@ namespace Deck_Converter
         string input = string.Empty;
         string gamepath;
         int gameindex;
+        private Deck _deck;
 
         public Main()
         {
             InitializeComponent();
         }
 
+        public Deck Deck
+        {
+            get { return _deck; }
+            set
+            {
+                if (_deck == value) return;
+                _deck = value;
+            }
+        }
+
         private void ConvertOCTGN()
         {
             textBox1.Text += "// Deck file for Magic Workstation (http://www.magicworkstation.com)" + Environment.NewLine;
             textBox1.Text += Environment.NewLine;
-            textBox1.Text += "//OCTGN conversion" + Environment.NewLine;
+            textBox1.Text += "// OCTGN conversion" + Environment.NewLine;
 
             GamesRepository mygame = new Octgn.Data.GamesRepository();
-            int mycount = mygame.Games.Count;
 
             XmlTextReader reader = new XmlTextReader(input);
             while (reader.Read())
@@ -245,15 +255,28 @@ namespace Deck_Converter
 
         private void ConvertMWS()
         {
+            GamesRepository mygame = new Octgn.Data.GamesRepository();
+            Game game = mygame.Games[gameindex];
+            Deck newDeck = new Deck(mygame.Games[gameindex]);
+            int i = 0; // Decks have 4 sections. Main = 0, Sideboard = 1, 
+
             TextReader reader = new StreamReader(textBox2.Text);
             string line = "";
             while ((line = reader.ReadLine()) != null)
             {
-
                 if (line.Contains("Sideboard"))
+                    i = 1;
+                if ((line.Contains('[')) && (line.Contains(']')))
                 {
-                }
+                    line = line.Trim();
+                    var quantity = line.Remove(line.IndexOf('[')).Trim();
+                    var set = line.Remove(0, line.IndexOf('[')+1);
+                    set = set.Remove(set.IndexOf(']')).Trim();
+                    var name = line.Remove(0, line.IndexOf(']')+1).Trim();
+                    newDeck.Sections[0].Cards.Add(new Deck.Element { Card = game.GetCardByName(name), Quantity = Convert.ToByte(quantity) });
+                }                
             }
+            newDeck.Save(Directory.GetCurrentDirectory() + "\\octgn.o8d");
         }
 
         private void btnConvert_Click(object sender, EventArgs e)
@@ -263,7 +286,7 @@ namespace Deck_Converter
             if (Path.GetExtension(textBox2.Text.ToLower()) == ".o8d".ToLower())
                 ConvertOCTGN();
 
-            if (Path.GetExtension(textBox2.Text.ToLower()) == ".mws".ToLower())
+            if (Path.GetExtension(textBox2.Text.ToLower()) == ".mwDeck".ToLower())
                 ConvertMWS();
         }
 
