@@ -275,7 +275,7 @@ namespace Deck_Converter
                         line = line.Trim();
                         var quantity = line.Remove(line.IndexOf(' ')).Trim();                                                
                         var name = line.Remove(0, line.IndexOf(' ') + 1).Trim();
-                        newDeck.Sections[i].Cards.Add(new Deck.Element { Card = game.GetCardByName(name), Quantity = Convert.ToByte(quantity) });
+                        newDeck.Sections[i].Cards.Add(new Deck.Element { Card = game.GetCardByName(name) ?? game.GetCardByName("Swamp"), Quantity = Convert.ToByte(quantity) });                        
                     }
                 }
             }
