@@ -21,21 +21,12 @@ namespace Deck_Converter
         string input = string.Empty;
         string gamepath;
         int gameindex;
-        private Deck _deck;
+        string extension;
+        private Deck deck;
 
         public Main()
         {
             InitializeComponent();
-        }
-
-        public Deck Deck
-        {
-            get { return _deck; }
-            set
-            {
-                if (_deck == value) return;
-                _deck = value;
-            }
         }
 
         private void ConvertOCTGN()
@@ -258,44 +249,60 @@ namespace Deck_Converter
             GamesRepository mygame = new Octgn.Data.GamesRepository();
             Game game = mygame.Games[gameindex];
             Deck newDeck = new Deck(mygame.Games[gameindex]);
-            int i = 0; // Decks have 4 sections. Main = 0, Sideboard = 1, 
+            int i = 0; // Decks have 4 sections. Main = 0, Sideboard = 1, Command Zone = 2, and Plains/Schemes = 3 
 
             TextReader reader = new StreamReader(textBox2.Text);
             string line = "";
             while ((line = reader.ReadLine()) != null)
             {
-                if (line.Contains("Sideboard"))
-                    i = 1;
-                if ((line.Contains('[')) && (line.Contains(']')))
+                i = 0;
+                if (line != "")
                 {
-                    line = line.Trim();
-                    var quantity = line.Remove(line.IndexOf('[')).Trim();
-                    var set = line.Remove(0, line.IndexOf('[')+1);
-                    set = set.Remove(set.IndexOf(']')).Trim();
-                    var name = line.Remove(0, line.IndexOf(']')+1).Trim();
-                    newDeck.Sections[0].Cards.Add(new Deck.Element { Card = game.GetCardByName(name), Quantity = Convert.ToByte(quantity) });
-                }                
+                    if (!line.Contains("//"))
+                    {
+                        if (line.Remove(3) == "SB:")
+                        {
+                            i = 1;
+                            line = line.Remove(0, 3);
+                        }
+
+                        if ((line.Contains('[')) && (line.Contains(']')))
+                        {
+                            int count = line.IndexOf('[');
+                            line = line.Remove(count, line.IndexOf(']') - count + 1);
+                        }
+
+                        line = line.Trim();
+                        var quantity = line.Remove(line.IndexOf(' ')).Trim();                                                
+                        var name = line.Remove(0, line.IndexOf(' ') + 1).Trim();
+                        newDeck.Sections[i].Cards.Add(new Deck.Element { Card = game.GetCardByName(name), Quantity = Convert.ToByte(quantity) });
+                    }
+                }
             }
-            newDeck.Save(Directory.GetCurrentDirectory() + "\\octgn.o8d");
+            deck = newDeck;
         }
 
         private void btnConvert_Click(object sender, EventArgs e)
         {
             textBox1.Clear();
-
-            if (Path.GetExtension(textBox2.Text.ToLower()) == ".o8d".ToLower())
+            string ext = Path.GetExtension(textBox2.Text.ToLower());
+            if (ext == ".o8d".ToLower())
                 ConvertOCTGN();
 
-            if (Path.GetExtension(textBox2.Text.ToLower()) == ".mwDeck".ToLower())
+            if (ext == ".mwDeck".ToLower())
+                ConvertMWS();
+
+            if (ext == ".dec".ToLower())
                 ConvertMWS();
         }
 
         private void btnOpen_Click(object sender, EventArgs e)
-        {
+        {            
             GamesRepository mygame = new Octgn.Data.GamesRepository();            
             OpenFileDialog dialogue = new OpenFileDialog();
             dialogue.Filter = "OCTGN deck files (*.o8d) | *.o8d";
             dialogue.Filter += "| Magic Workstation files (*.mwDeck) | *.mwDeck";
+            dialogue.Filter += "| MTGO/Apprentice files (*.dec) | *.dec";
             dialogue.InitialDirectory = mygame.Games[gameindex].DefaultDecksPath;
             gamepath = mygame.Games[gameindex].DefaultDecksPath;
 
@@ -303,24 +310,45 @@ namespace Deck_Converter
                 input = dialogue.FileName;
             if (dialogue.FileName == string.Empty)
                 return;
-
+            extension = Path.GetExtension(input);
             textBox2.Text = input;
+            textBox1.Clear();
         }
 
         private void btnSave_Click(object sender, EventArgs e)
         {
             SaveFileDialog dialogue = new SaveFileDialog();
-            dialogue.Filter = "MWS deck files (*.mwDeck) | *.mwDeck";
             dialogue.InitialDirectory = gamepath;
-            dialogue.FileName = Path.GetFileNameWithoutExtension(input) + ".mwDeck";
-
-            if (dialogue.ShowDialog() == DialogResult.OK)
+            if (extension.ToLower() == ".o8d".ToLower())
             {
-                input = dialogue.FileName;
-                File.WriteAllText(input, textBox1.Text);
+                dialogue.Filter = "MWS deck files (*.mwDeck) | *.mwDeck";
+                dialogue.FileName = Path.GetFileNameWithoutExtension(input) + ".mwDeck";
+                if (dialogue.ShowDialog() == DialogResult.OK)
+                {
+                    input = dialogue.FileName;
+                    File.WriteAllText(input, textBox1.Text);
+                }
             }
-            if (dialogue.FileName == string.Empty)
-                return;            
+            if (extension.ToLower() == ".mwDeck".ToLower())
+            {
+                dialogue.Filter = "OCTGN deck files (*.o8d) | *.o8d";
+                dialogue.FileName = Path.GetFileNameWithoutExtension(input) + ".o8d";
+                if (dialogue.ShowDialog() == DialogResult.OK)
+                {
+                    input = dialogue.FileName;
+                    deck.Save(input);                    
+                }
+            }
+            if (extension.ToLower() == ".dec".ToLower())
+            {
+                dialogue.Filter = "OCTGN deck files (*.o8d) | *.o8d";
+                dialogue.FileName = Path.GetFileNameWithoutExtension(input) + ".o8d";
+                if (dialogue.ShowDialog() == DialogResult.OK)
+                {
+                    input = dialogue.FileName;
+                    deck.Save(input);
+                }
+            }                                        
         }
 
         private void btnDetails_Click(object sender, EventArgs e)
@@ -342,22 +370,7 @@ namespace Deck_Converter
                     Bitmap bimage = new Bitmap(myimage);
                     btnDetails.Image = bimage;
                 }
-        }
-
-        private static Regex isGuid = new Regex(@"^(\{){0,1}[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}(\}){0,1}$", RegexOptions.Compiled);
-
-        private static bool IsGuid(string candidate)
-        {
-            if (candidate != null)
-            {
-                if (isGuid.IsMatch(candidate))
-                {
-                    return true;
-                }
-            }
-
-            return false;
-        }
+        }        
 
         private void Main_Load(object sender, EventArgs e)
         {
